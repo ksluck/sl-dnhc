@@ -1,0 +1,17 @@
+{
+  "rendering" : true,
+  "agent" : "SampleAgent",
+  "environment" : "Pendulum",
+  "episodes" : 100,
+  "exp_id" : 1,
+  "filepath" : "/tmp/tf",
+  "logger" : "tensorboard",
+  "checkpoint_interval" : 10,
+  "checkpoint_filepath" : "/tmp/tf",
+  "checkpoint_dir" : "/checkpoints",
+  "tensorboard" : {
+    "summaries_dir" : "/tf_summaries"
+  },
+  "SampleAgent" : { "enforce_x_nmbr_of_steps" : 300},
+  "Acrobot" : { "enforce_x_nmbr_of_steps" : 300 },
+}
