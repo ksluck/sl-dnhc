@@ -1,6 +1,5 @@
 from SL.World import World
 import SL.TensorboardLogger as TensorboardLogger
-import Agents.SampleAgent as SampleAgent
 import json
 import time
 import argparse
@@ -21,14 +20,28 @@ def main():
     config['checkpoint_dir'] = config['checkpoint_filepath'] + '/' + str(exp_id) + config['checkpoint_dir']
 
     env_fun = None
-    if 'Acrobot' == environment_name:
-        env_fun = Acrobot
+    if 'Stacking' == environment_name:
+        import Tasks.Stacking as Stacking
+        env_fun = Stacking.Stacking
     else:
         raise ValueError('Environment name not set or unknown. Current value: {}'.format(environment_name))
 
     agent_fun = None
     if agent_name == 'SampleAgent':
+        import Agents.SampleAgent as SampleAgent
         agent_fun = SampleAgent.SampleAgent
+    elif agent_name == 'DnhcAgent':
+        import Agents.DnhcAgent as DnhcAgent
+        agent_fun = DnhcAgent.DnhcAgent
+    elif agent_name == 'DnhcALUAgent':
+        import Agents.DnhcALUAgent as DnhcAgent
+        agent_fun = DnhcAgent.DnhcAgent
+    elif agent_name == 'DnhcALUAgent_wM':
+        import Agents.DnhcALUAgent_wM as DnhcAgent
+        agent_fun = DnhcAgent.DnhcAgent
+    elif agent_name == 'DncAgent':
+        import Agents.DncAgent as DncAgent
+        agent_fun = DncAgent.DncAgent
     else:
         raise ValueError('Agent name not set or unknown. Current Value: {}'.format(agent_name))
     print('Agent: {}'.format(agent_name))
@@ -52,7 +65,10 @@ def main():
     #agents = [TeeDynasaur(envs[0], config=config_teedyna), TeeDynasaur(envs[1], config=config_teedyna), TeeDynasaur(envs[2], config=config_teedyna)]
     logger = logger_fun(config_logger)
     world = World(agents, envs, logger, 0, config)
-    world.execute(max_episodes)
+    if config['execution']:
+        world.execute_step()
+    else:
+        world.execute(max_episodes)
 
 if __name__ == "__main__":
     main()

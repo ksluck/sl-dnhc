@@ -4,7 +4,7 @@ Code written by Kevin S. Luck
 """
 import tensorflow as tf
 import numpy as np
-import RL.Logger as Logger
+import SL.Logger as Logger
 
 
 class TensorboardLogger(Logger.Logger):
@@ -37,7 +37,7 @@ class TensorboardLogger(Logger.Logger):
               self._placeholder_ep_reward)
 
             with tf.name_scope('summaries'):
-              tf.summary.scalar('training_loss', self._test_episode_reward)
+              tf.summary.scalar('training_loss', self._episode_reward)
 
 
         with tf.name_scope('tensorboard_test'):
@@ -60,7 +60,7 @@ class TensorboardLogger(Logger.Logger):
         self._first_entry = True
         self._episode = 0
 
-    def logLoss(self, nmbr_steps = 1, episode, loss, test = False, sess = None, agent_id=0):
+    def logLoss(self, nmbr_steps, episode, loss, test = False, sess = None, agent_id=0):
         """ Logs the rewards to a tensorboard file.
 
         Args:
@@ -70,7 +70,7 @@ class TensorboardLogger(Logger.Logger):
           sess: A tensorflow session
           agent_id: ID of agent, not used currently.
         """
-        tf.logging.info('Finished Episode {} with reward {}'.format(episode, reward))
+        tf.logging.info('Finished Episode {} with loss {}'.format(episode, loss))
         reward = loss/nmbr_steps
         if self._first_entry:
             self._logger_writer.add_session_log(tf.SessionLog(status=tf.SessionLog.START), global_step=episode)

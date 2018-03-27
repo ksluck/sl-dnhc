@@ -15,7 +15,7 @@ class Logger():
         """
         pass
 
-    def logLoss(self, nmbr_steps = 1, episode, loss, test=False, sess, agent_id=0):
+    def logLoss(self, nmbr_steps, episode, loss, test=False, sess = None, agent_id=0):
         """ Function to log the episodic reward.
 
         Args:

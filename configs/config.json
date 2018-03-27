@@ -1,17 +1,98 @@
 {
   "rendering" : true,
-  "agent" : "SampleAgent",
-  "environment" : "Pendulum",
-  "episodes" : 100,
-  "exp_id" : 1,
-  "filepath" : "/tmp/tf",
+  "execution" : false,
+  "agent" : "DnhcAgent",
+  "environment" : "Stacking",
+  "episodes" : 10000,
+  "exp_id" : 3,
+  "filepath" : "/tmp/tf_dnc",
   "logger" : "tensorboard",
-  "checkpoint_interval" : 10,
-  "checkpoint_filepath" : "/tmp/tf",
+  "checkpoint_interval" : 100,
+  "checkpoint_filepath" : "/tmp/tf_dnc",
   "checkpoint_dir" : "/checkpoints",
   "tensorboard" : {
     "summaries_dir" : "/tf_summaries"
   },
   "SampleAgent" : { "enforce_x_nmbr_of_steps" : 300},
+  "DnhcAgent" : {
+    "clip_value" : -1,
+    "max_grad_norm" : 50,
+    "learning_rate" : 1e-4,
+    "optimizer_epsilon" : 1e-10,
+    "data_access_config" : {
+      "memory_size": 16,
+      "word_size": 16,
+      "num_reads": 4,
+      "num_writes": 1
+    },
+    "instr_access_config" : {
+      "memory_size": 6,
+      "word_size": 128,
+      "num_reads": 3,
+      "num_writes": 1
+    },
+    "controller_config" : {
+      "hidden_size" : 64
+    }
+  },
+  "DnhcALUAgent" : {
+    "clip_value" : -1,
+    "max_grad_norm" : 50,
+    "learning_rate" : 1e-4,
+    "optimizer_epsilon" : 1e-10,
+    "data_access_config" : {
+      "memory_size": 16,
+      "word_size": 16,
+      "num_reads": 4,
+      "num_writes": 1
+    },
+    "instr_access_config" : {
+      "memory_size": 3,
+      "word_size": 3,
+      "num_reads": 1,
+      "num_writes": 1
+    },
+    "controller_config" : {
+      "hidden_size" : 64
+    }
+  },
+  "DnhcALUAgent_wM" : {
+    "clip_value" : -1,
+    "max_grad_norm" : 50,
+    "learning_rate" : 1e-4,
+    "optimizer_epsilon" : 1e-10,
+    "data_access_config" : {
+      "memory_size": 16,
+      "word_size": 16,
+      "num_reads": 4,
+      "num_writes": 1
+    },
+    "instr_access_config" : {
+      "memory_size": 3,
+      "word_size": 3,
+      "num_reads": 1,
+      "num_writes": 1
+    },
+    "controller_config" : {
+      "hidden_size" : 64
+    }
+  },
+  "DncAgent" : {
+    "clip_value" : -1,
+    "max_grad_norm" : 50,
+    "learning_rate" : 1e-4,
+    "optimizer_epsilon" : 1e-10,
+    "data_access_config" : {
+      "memory_size": 16,
+      "word_size": 16,
+      "num_reads": 4,
+      "num_writes": 1
+    },
+    "controller_config" : {
+      "hidden_size" : 64
+    }
+  },
+
   "Acrobot" : { "enforce_x_nmbr_of_steps" : 300 },
+  "Stacking": {}
 }
