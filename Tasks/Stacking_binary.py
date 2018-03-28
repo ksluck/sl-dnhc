@@ -22,27 +22,27 @@ class Stacking(Task.Task):
                                          [8,4,9,2,1],
                                          [2,5,8,9,12]], dtype=np.uint8)
 
-        self._training_boxes_binary = np.zeros((3*4, self._training_boxes.shape[1]), dtype=float32)
+        self._training_boxes_binary = np.zeros((3*4, self._training_boxes.shape[1]), dtype=np.float32)
         for i in range(0, self._training_boxes_binary.shape[1]):
             self._training_boxes_binary[:,i] = self._to_binary(self._training_boxes[:,i], 4)
 
-        self._test_boxes_binary = np.zeros((3*4, self._test_boxes.shape[1]), dtype=float32)
-        for i in range(0, self._training_boxes_binary.shape[1]):
+        self._test_boxes_binary = np.zeros((3*4, self._test_boxes.shape[1]), dtype=np.float32)
+        for i in range(0, self._test_boxes_binary.shape[1]):
             self._test_boxes_binary[:,i] = self._to_binary(self._test_boxes[:,i], 4)
 
         self._training_indicies = list(range(0,40))
         self._test_indicies = list(range(0,5))
         self._number_of_boxes = 4
-        self._stacking_choices = [-1.,0.,1.]
+        self._stacking_choices = [1.0]#[1.0,2.0,3.0]
 
-    def _to_binary(ar, m):
+    def _to_binary(self,ar, m):
         ar_1 = np.array(list(np.binary_repr(ar[0]).zfill(m))).astype(np.float32)
         ar_2 = np.array(list(np.binary_repr(ar[1]).zfill(m))).astype(np.float32)
         ar_3 = np.array(list(np.binary_repr(ar[2]).zfill(m))).astype(np.float32)
         return np.concatenate((ar_1, ar_2, ar_3))
 
 
-    def _to_binary_scalar(val, m):
+    def _to_binary_scalar(self, val, m):
         val_bin = np.array(list(np.binary_repr(val).zfill(m))).astype(np.float32)
         return val_bin
 
@@ -56,21 +56,22 @@ class Stacking(Task.Task):
 
     def sample_from_training_set(self, nmbr_episodes):
         inputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 4*3+3))
-        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 4))
+        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 6))
 
         for ep in range(0,nmbr_episodes):
             box_choices = np.random.choice(self._training_indicies, size=(self._number_of_boxes,), replace=False)
             stacking_choice = np.random.choice(self._stacking_choices, size=(1,), replace=False)
-            order_choice = np.random.permutation(range(0,self._number_of_boxes))
+            #order_choice = np.random.permutation(range(0,self._number_of_boxes))
+            order_choice = [0,1,2,3]
             boxes_output_order = self._training_boxes[:,box_choices[order_choice[:]]]
 
             inputs[ep,0:self._number_of_boxes,0:12] = np.transpose(self._training_boxes_binary[:,box_choices])
-            inputs[ep,self._number_of_boxes:,12] = np.ones(shape=(self._number_of_boxes,))
+            inputs[ep,self._number_of_boxes+1:,12] = np.ones(shape=(self._number_of_boxes-1,))
             inputs[ep,self._number_of_boxes:,13] = np.ones(shape=(self._number_of_boxes,)) * stacking_choice
             inputs[ep,self._number_of_boxes:,14] = np.array(order_choice)
 
             for i in range(1,self._number_of_boxes):
-                expected_outputs[ep, self._number_of_boxes + i,:] = self._to_binary_scalar(np.sum( boxes_output_order[int(stacking_choice)+1, range(0,i)]), 4)
+                expected_outputs[ep, self._number_of_boxes + i,:] = self._to_binary_scalar(np.sum( boxes_output_order[int(stacking_choice)-1, range(0,i)]), 6)
 
         return inputs, expected_outputs
 
@@ -78,21 +79,22 @@ class Stacking(Task.Task):
 
     def sample_from_test_set(self, nmbr_episodes):
         inputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 4*3+3))
-        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 4))
+        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 6))
 
         for ep in range(0,nmbr_episodes):
             box_choices = np.random.choice(self._test_indicies, size=(self._number_of_boxes,), replace=False)
             stacking_choice = np.random.choice(self._stacking_choices, size=(1,), replace=False)
-            order_choice = np.random.permutation(range(0,self._number_of_boxes))
+            #order_choice = np.random.permutation(range(0,self._number_of_boxes))
+            order_choice = [0,1,2,3]
             boxes_output_order = self._test_boxes[:,box_choices[order_choice[:]]]
 
-            inputs[ep,0:self._number_of_boxes,0:12] = np.transpose(self._test_boxes[:,box_choices])
-            inputs[ep,self._number_of_boxes:,12] = np.ones(shape=(self._number_of_boxes,))
+            inputs[ep,0:self._number_of_boxes,0:12] = np.transpose(self._test_boxes_binary[:,box_choices])
+            inputs[ep,self._number_of_boxes+1:,12] = np.ones(shape=(self._number_of_boxes-1,))
             inputs[ep,self._number_of_boxes:,13] = np.ones(shape=(self._number_of_boxes,)) * stacking_choice
             inputs[ep,self._number_of_boxes:,14] = np.array(order_choice)
 
             for i in range(1,self._number_of_boxes):
-                expected_outputs[ep, self._number_of_boxes + i,:] = self._to_binary_scalar(np.sum( boxes_output_order[int(stacking_choice)+1, range(0,i)]), 4)
+                expected_outputs[ep, self._number_of_boxes + i,:] = self._to_binary_scalar(np.sum( boxes_output_order[int(stacking_choice)-1, range(0,i)]), 6)
 
         return inputs, expected_outputs
 
@@ -147,7 +149,7 @@ class Stacking(Task.Task):
         Returns:
             Tuple which contains the dimensions of the state.
         """
-        return (6,)
+        return (15,)
 
     def get_action_size(self):
         """Returns the size of the actions.
@@ -155,7 +157,7 @@ class Stacking(Task.Task):
         Returns:
             Tuple which contains the dimenions of the action.
         """
-        return (3,)
+        return (6,)
 
     def initialize(self, sess):
         """ Called exactly once when the agent is set up before the very first

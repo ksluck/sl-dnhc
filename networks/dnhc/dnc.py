@@ -65,12 +65,21 @@ class DNC(snt.RNNCore):
     """
     super(DNC, self).__init__(name=name)
 
+    self._b_init = tf.zeros(access_config_2['num_reads']) + 0.01
+
     with self._enter_variable_scope():
       #self._controller = snt.LSTM(**controller_config)
-      self._controller = snt.DeepRNN([snt.Linear(controller_config['hidden_size'])], skip_connections=False)
+      #self._controller = snt.DeepRNN([snt.Linear(200), tf.nn.leaky_relu, snt.Linear(controller_config['hidden_size'])], skip_connections=False)
+      self._controller = snt.DeepRNN([snt.Linear(200), tf.nn.leaky_relu, snt.LSTM(controller_config['hidden_size'])], skip_connections=False)
       self._access = access.MemoryAccess(**access_config)
       #self._access_2 = access.MemoryAccess(**access_config_2)
       self._access_2 = access_instruction.MemoryAccessInst(**access_config_2)
+      self._b =  tf.get_variable(name="b",
+                           initializer=self._b_init,
+                           trainable=True)
+      #self._bn = snt.BatchNorm(update_ops_collection=None)
+
+      #self._test_layer = snt.Linear(64)
 
     self._access_output_size = np.prod(self._access.output_size.as_list())
     # self._access_output_size_2 = np.prod(self._access_2.output_size.as_list())
@@ -85,7 +94,7 @@ class DNC(snt.RNNCore):
         access_state_2=self._access_2.state_size,
         controller_state=self._controller.state_size)
 
-    self._b_init = tf.zeros(access_config_2['num_reads'])
+
     #self._W_init = tf.zeros(self._output_size.as_list()[0]+[])
 
   def _clip_if_enabled(self, x):
@@ -118,6 +127,7 @@ class DNC(snt.RNNCore):
     prev_controller_state = prev_state.controller_state
 
     batch_flatten = snt.BatchFlatten()
+    #inputs = self._bn(inputs, is_training=True)
     controller_input = tf.concat(
         [batch_flatten(inputs), batch_flatten(prev_access_output)], 1)
 
@@ -137,18 +147,22 @@ class DNC(snt.RNNCore):
     #     output_size=self._output_size.as_list()[0],
     #     name='output_linear')(output)
     with tf.name_scope('output_linear_fancy') as scope:
-        b =  tf.get_variable(name="b",
-                             initializer=self._b_init,
-                             trainable=True)
+        #output = tf.nn.relu(output)
+        #output = self._test_layer(output)
         output = tf.expand_dims(output,-1)
         output = tf.matmul(access_output_2, output)
+        #tf.transpose(x, perm=[1, 0])
+        #output = tf.matmul(output, access_output_2)
         output = tf.squeeze(output,-1)
-        output = output + b
+        output = output + self._b
 
     #output = tf.nn.relu(output)
     #output = snt.Linear(3, name='last_layer')(output)
 
     output = self._clip_if_enabled(output)
+    #output = tf.nn.leaky_relu(output)
+    #output = tf.round(tf.nn.sigmoid(output))
+    #output = tf.nn.sigmoid(output) * 30.0
 
     return output, DNCState(
         access_output=access_output,

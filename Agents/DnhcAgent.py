@@ -56,14 +56,21 @@ class DnhcAgent(Agent.Agent):
                 time_major=False,
                 initial_state=initial_state)
 
-        #self._loss = tf.boolean_mask(self._output_sequence - self._batch_output, self._batch_mask, axis=1)
-        #self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
+
         output_masked = tf.boolean_mask(self._output_sequence, self._batch_mask, axis=1)
         batch_output_masked = tf.boolean_mask(self._batch_output, self._batch_mask, axis=1)
-        batch_output_masked =  batch_output_masked * 10.0
-        output_masked = output_masked * 10.0
-        self._loss = tf.losses.huber_loss(labels=batch_output_masked, predictions=output_masked, delta=1.0)#, reduction=tf.losses.Reduction.MEAN)
+        batch_output_masked =  batch_output_masked
+        output_masked = output_masked
+        self._output_sequence_binary = tf.round(tf.sigmoid(self._output_sequence))
+        #self._loss = tf.losses.huber_loss(labels=batch_output_masked, predictions=output_masked, delta=1.0)#, reduction=tf.losses.Reduction.MEAN)
+        #self._loss = tf.boolean_mask(self._output_sequence - self._batch_output, self._batch_mask, axis=1)
+        #self._loss = output_masked - batch_output_masked
+        #self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
         #self._loss = self._loss / (self._batch_size * self._episode_length)
+
+        #Logits loss
+        xent = tf.nn.sigmoid_cross_entropy_with_logits(labels=batch_output_masked, logits=output_masked)
+        self._loss  = tf.reduce_sum(xent) / (32.0 * 3)
 
         trainable_variables = dnc_core.get_variables()
         grads, _ = tf.clip_by_global_norm(
@@ -117,22 +124,26 @@ class DnhcAgent(Agent.Agent):
         """
         feed_dict = {
             self._batch_sequence: inputs,
-            self._batch_mask: inputs[0,:,3],
+            self._batch_mask: inputs[0,:,-3],
             self._batch_output: expected_outputs,
         }
 
         if test:
             print("input")
             print(inputs[0])
-            output, loss = sess.run([self._output_sequence,self._loss], feed_dict=feed_dict)
+            output, loss = sess.run([self._output_sequence_binary,self._loss], feed_dict=feed_dict)
             print("Output")
             print(output[0])
+            print("Output Expected")
+            print(expected_outputs[0])
         else:
             print("input training")
             print(inputs[0])
+            loss, _, output = sess.run([self._loss, self._optim_op, self._output_sequence_binary], feed_dict=feed_dict)
             print("Output training")
+            print(output[0])
+            print("Output training expected")
             print(expected_outputs[0])
-            loss, _ = sess.run([self._loss, self._optim_op], feed_dict=feed_dict)
         return loss
 
     def step(self, state, reward, episode, step, test, sess):

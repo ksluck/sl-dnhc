@@ -118,10 +118,13 @@ class DNC(snt.RNNCore):
                                                prev_access_state)
 
     output = tf.concat([controller_output, batch_flatten(access_output)], 1)
+    output = snt.Linear(400, name='etc')(output)
+    output = tf.nn.leaky_relu(output)
     output = snt.Linear(
         output_size=self._output_size.as_list()[0],
         name='output_linear')(output)
     output = self._clip_if_enabled(output)
+    output = tf.nn.leaky_relu(output)
 
     return output, DNCState(
         access_output=access_output,

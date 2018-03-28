@@ -23,6 +23,12 @@ def main():
     if 'Stacking' == environment_name:
         import Tasks.Stacking as Stacking
         env_fun = Stacking.Stacking
+    elif 'StackingOne' == environment_name:
+        import Tasks.Stacking_one as Stacking
+        env_fun = Stacking.Stacking
+    elif 'StackingBinary' == environment_name:
+        import Tasks.Stacking_binary as Stacking
+        env_fun = Stacking.Stacking
     else:
         raise ValueError('Environment name not set or unknown. Current value: {}'.format(environment_name))
 

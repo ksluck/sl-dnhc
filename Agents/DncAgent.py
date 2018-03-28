@@ -53,8 +53,17 @@ class DncAgent(Agent.Agent):
             time_major=False,
             initial_state=initial_state)
 
-        self._loss = tf.boolean_mask(self._output_sequence - self._batch_output, self._batch_mask, axis=1)
+        #self._loss = tf.boolean_mask(self._output_sequence - self._batch_output, self._batch_mask, axis=1)
+        #self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
+        output_masked = tf.boolean_mask(self._output_sequence, self._batch_mask, axis=1)
+        batch_output_masked = tf.boolean_mask(self._batch_output, self._batch_mask, axis=1)
+        batch_output_masked =  batch_output_masked
+        output_masked = output_masked
+        #self._loss = tf.losses.huber_loss(labels=batch_output_masked, predictions=output_masked, delta=0.1)
+        self._loss = output_masked - batch_output_masked
         self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
+        #self._loss = self._loss / (self._batch_size * 3)
+
         trainable_variables = dnc_core.get_variables()
         grads, _ = tf.clip_by_global_norm(
             tf.gradients(self._loss, trainable_variables), self._max_grad_norm)
@@ -71,7 +80,7 @@ class DncAgent(Agent.Agent):
         """
         feed_dict = {
             self._batch_sequence: inputs,
-            self._batch_mask: inputs[1,:,3],
+            self._batch_mask: inputs[0,:,3],
             self._batch_output: expected_outputs,
         }
 

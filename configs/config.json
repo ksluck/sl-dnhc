@@ -2,9 +2,9 @@
   "rendering" : true,
   "execution" : false,
   "agent" : "DnhcAgent",
-  "environment" : "Stacking",
-  "episodes" : 10000,
-  "exp_id" : 3,
+  "environment" : "StackingBinary",
+  "episodes" : 100000,
+  "exp_id" : 1019,
   "filepath" : "/tmp/tf_dnc",
   "logger" : "tensorboard",
   "checkpoint_interval" : 100,
@@ -15,7 +15,7 @@
   },
   "SampleAgent" : { "enforce_x_nmbr_of_steps" : 300},
   "DnhcAgent" : {
-    "clip_value" : -1,
+    "clip_value" : 50,
     "max_grad_norm" : 50,
     "learning_rate" : 1e-4,
     "optimizer_epsilon" : 1e-10,
@@ -23,12 +23,12 @@
       "memory_size": 16,
       "word_size": 16,
       "num_reads": 4,
-      "num_writes": 1
+      "num_writes": 2
     },
     "instr_access_config" : {
-      "memory_size": 6,
+      "memory_size": 12,
       "word_size": 128,
-      "num_reads": 3,
+      "num_reads": 6,
       "num_writes": 1
     },
     "controller_config" : {
@@ -85,8 +85,8 @@
     "data_access_config" : {
       "memory_size": 16,
       "word_size": 16,
-      "num_reads": 4,
-      "num_writes": 1
+      "num_reads": 3,
+      "num_writes": 3
     },
     "controller_config" : {
       "hidden_size" : 64
@@ -94,5 +94,7 @@
   },
 
   "Acrobot" : { "enforce_x_nmbr_of_steps" : 300 },
-  "Stacking": {}
+  "Stacking": {},
+  "StackingOne": {},
+  "StackingBinary": {}
 }

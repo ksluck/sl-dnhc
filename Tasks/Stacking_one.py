@@ -69,10 +69,10 @@ class Stacking(Task.Task):
                                          133,82,141,105,139,41,17,44,94,5,76,
                                          106,130,28,102,27,76,29,46,106,53,125,
                                          102,148,117,52,29,63,27,27,147,16,76,
-                                         11,29,105,22,89,20,16]], dtype=np.float64) / 1.0
+                                         11,29,105,22,89,20,16]], dtype=np.float64) / 10.0
         self._test_boxes = np.array([    [17,8,94,25,127],
                                          [149,115,58,96,56],
-                                         [131,64,45,134,52]], dtype=np.float64) / 1.0
+                                         [131,64,45,134,52]], dtype=np.float64) / 10.0
         self._training_indicies = list(range(0,self._training_boxes.shape[1]))
         self._test_indicies = list(range(0,self._test_boxes.shape[1]))
         self._number_of_boxes = 4
@@ -86,7 +86,7 @@ class Stacking(Task.Task):
 
     def sample_from_training_set(self, nmbr_episodes):
         inputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 6))
-        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 3))
+        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 1))
 
         for ep in range(0,nmbr_episodes):
             box_choices = np.random.choice(self._training_indicies, size=(self._number_of_boxes,), replace=False)
@@ -101,7 +101,7 @@ class Stacking(Task.Task):
 
 
             for i in range(1,self._number_of_boxes):
-                expected_outputs[ep, self._number_of_boxes + i,int(stacking_choice) -1] = np.sum( boxes_output_order[int(stacking_choice)-1, range(0,i)])
+                expected_outputs[ep, self._number_of_boxes + i,0] = np.sum( boxes_output_order[int(stacking_choice)-1, range(0,i)])
 
         return inputs, expected_outputs
 
@@ -109,7 +109,7 @@ class Stacking(Task.Task):
 
     def sample_from_test_set(self, nmbr_episodes):
         inputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 6))
-        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 3))
+        expected_outputs = np.zeros(shape=(nmbr_episodes, 2*self._number_of_boxes, 1))
 
         for ep in range(0,nmbr_episodes):
             box_choices = np.random.choice(self._test_indicies, size=(self._number_of_boxes,), replace=False)
@@ -123,7 +123,7 @@ class Stacking(Task.Task):
             inputs[ep,self._number_of_boxes:,5] = np.array(order_choice)
 
             for i in range(1,self._number_of_boxes):
-                expected_outputs[ep, self._number_of_boxes + i,int(stacking_choice) -1] = np.sum( boxes_output_order[int(stacking_choice)-1, range(0,i)])
+                expected_outputs[ep, self._number_of_boxes + i,0] = np.sum( boxes_output_order[int(stacking_choice)-1, range(0,i)])
 
         return inputs, expected_outputs
 
@@ -186,7 +186,7 @@ class Stacking(Task.Task):
         Returns:
             Tuple which contains the dimenions of the action.
         """
-        return (3,)
+        return (1,)
 
     def initialize(self, sess):
         """ Called exactly once when the agent is set up before the very first
