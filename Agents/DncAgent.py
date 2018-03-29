@@ -19,7 +19,7 @@ class DncAgent(Agent.Agent):
         self._observation_shape = env.get_observation_size()
         self._output_size = env.get_action_size()
 
-        self._batch_size = 32
+        self._batch_size = 16
 
         self._build()
 
@@ -34,7 +34,7 @@ class DncAgent(Agent.Agent):
         learning_rate = self._config['learning_rate']
 
         #TODO
-        self._episode_length = 2*4
+        self._episode_length = 4+7
 
         dnc_core = dnc.DNC(dnc_access_config, dnc_controller_config, dnc_output_size, dnc_clip_value)
 
@@ -59,10 +59,13 @@ class DncAgent(Agent.Agent):
         batch_output_masked = tf.boolean_mask(self._batch_output, self._batch_mask, axis=1)
         batch_output_masked =  batch_output_masked
         output_masked = output_masked
+        self._output_sequence_binary = tf.round(tf.sigmoid(output_masked))
         #self._loss = tf.losses.huber_loss(labels=batch_output_masked, predictions=output_masked, delta=0.1)
-        self._loss = output_masked - batch_output_masked
-        self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
+        #self._loss = output_masked - batch_output_masked
+        #self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
         #self._loss = self._loss / (self._batch_size * 3)
+        xent = tf.nn.sigmoid_cross_entropy_with_logits(labels=batch_output_masked, logits=output_masked)
+        self._loss  = tf.reduce_sum(xent) / (self._batch_size * 6.0)
 
         trainable_variables = dnc_core.get_variables()
         grads, _ = tf.clip_by_global_norm(
@@ -73,6 +76,40 @@ class DncAgent(Agent.Agent):
         self._optim_op = optimizer.apply_gradients(zip(grads, trainable_variables))
 
 
+        init_state_tmp = dnc_core.initial_state(1)
+        init_state_step_flat = tf.contrib.framework.nest.flatten(init_state_tmp)
+        with tf.name_scope('init_state_vars'):
+            init_state_step_vars = [tf.Variable(initial_value=x, trainable=False)
+                                     for x in init_state_step_flat]
+        init_state_step_vars_tuple = tf.contrib.framework.nest.pack_sequence_as(init_state_tmp,
+                                                     init_state_step_vars)
+        self._init_state_step_vars_tuple = init_state_step_vars_tuple
+
+        # RNN module for making only one step
+        # Technically this is unneccessary
+        # Input to RNN module for a single step
+        self._input_sequence_step = tf.placeholder(tf.float32,
+          shape=[1, 1] + list(self._observation_shape), name='input_step')
+        #with tf.name_scope('Dynamic_step'):
+        with tf.variable_scope('step_'):
+            self._output_sequence_step, output_state_step = tf.nn.dynamic_rnn(
+                cell=dnc_core,
+                inputs=self._input_sequence_step,
+                time_major=False,
+                initial_state=init_state_step_vars_tuple,
+                scope="rnn_step")
+        self._output_state_step = output_state_step
+
+        # Flatten the output state and generate ops to assign output state to initial state
+        output_state_flat = tf.contrib.framework.nest.flatten(output_state_step)
+        with tf.control_dependencies(output_state_flat):
+            output_state_assign_ops = [tf.assign(var,val) for var,val in zip(init_state_step_vars, output_state_flat)]
+            self._assign_last_state_to_current_op = tf.group(*output_state_assign_ops)
+        # Op to asign the initial state to the input_state variables
+        init_state_assign_ops = [tf.assign(var,val) for var,val in zip(init_state_step_vars,init_state_step_flat)]
+        self._assign_initial_state_to_current_op = tf.group(*init_state_assign_ops)
+
+
     def evaluate_batch(self, inputs, expected_outputs, test, sess):
         """
         Returns:
@@ -80,12 +117,18 @@ class DncAgent(Agent.Agent):
         """
         feed_dict = {
             self._batch_sequence: inputs,
-            self._batch_mask: inputs[0,:,3],
+            self._batch_mask: inputs[0,:,-1],
             self._batch_output: expected_outputs,
         }
 
         if test:
-            loss = sess.run(self._loss, feed_dict=feed_dict)
+            output, loss = sess.run([self._output_sequence_binary,self._loss], feed_dict=feed_dict)
+            print("input")
+            print(inputs[0])
+            print("Output")
+            print(output[0])
+            print("Output Expected")
+            print(expected_outputs[0])
         else:
             loss, _ = sess.run([self._loss, self._optim_op], feed_dict=feed_dict)
         return loss
@@ -93,14 +136,23 @@ class DncAgent(Agent.Agent):
     def step(self, state, reward, episode, step, test, sess):
         # state - current state
         # reward - reward from previous action
-        action = np.random.randn(*self._action_size)/3.0
-        action = np.minimum(np.ones(self._action_size), np.maximum(-np.ones(self._action_size),action))
+        feed_dict = {
+            self._input_sequence_step : [[state]],
+        }
+
+        action, dnc_state, _, dnc_training_init = sess.run([self._output_sequence_step, self._output_state_step, self._assign_last_state_to_current_op, self.__initial_state], feed_dict=feed_dict)
+        self._mem_state = dnc_state.access_state.memory
+        self._instr_mem = dnc_state.access_state_2.memory
+        self._instr_mem_check = dnc_training_init.access_state_2.memory
+        #action = action[0][0]
+        #sess.run()
         return action
 
     def end_episode(self, final_state, reward, test, sess):
         pass
 
     def start_episode(self, start_state, test, sess):
+        sess.run(self._assign_initial_state_to_current_op)
         pass
 
     def initialize(self, sess):

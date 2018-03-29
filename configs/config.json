@@ -1,10 +1,10 @@
 {
   "rendering" : true,
   "execution" : false,
-  "agent" : "DnhcAgent",
-  "environment" : "StackingBinary",
+  "agent" : "DncAgent",
+  "environment" : "StackingBinaryZcopyStack",
   "episodes" : 100000,
-  "exp_id" : 1019,
+  "exp_id" : 6000,
   "filepath" : "/tmp/tf_dnc",
   "logger" : "tensorboard",
   "checkpoint_interval" : 100,
@@ -78,15 +78,15 @@
     }
   },
   "DncAgent" : {
-    "clip_value" : -1,
+    "clip_value" : 20,
     "max_grad_norm" : 50,
     "learning_rate" : 1e-4,
     "optimizer_epsilon" : 1e-10,
     "data_access_config" : {
       "memory_size": 16,
       "word_size": 16,
-      "num_reads": 3,
-      "num_writes": 3
+      "num_reads": 4,
+      "num_writes": 1
     },
     "controller_config" : {
       "hidden_size" : 64
@@ -96,5 +96,8 @@
   "Acrobot" : { "enforce_x_nmbr_of_steps" : 300 },
   "Stacking": {},
   "StackingOne": {},
-  "StackingBinary": {}
+  "StackingBinary": {},
+  "StackingBinaryZ": {},
+  "StackingBinaryZcopy": {},
+  "StackingBinaryZcopyStack": {}
 }

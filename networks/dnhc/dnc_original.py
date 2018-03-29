@@ -64,7 +64,7 @@ class DNC(snt.RNNCore):
 
     with self._enter_variable_scope():
       #self._controller = snt.LSTM(**controller_config)
-      self._controller = snt.DeepRNN([snt.Linear(controller_config['hidden_size'])], skip_connections=False)
+      self._controller = snt.DeepRNN([snt.Linear(controller_config['hidden_size']), tf.nn.leaky_relu, snt.LSTM(**controller_config), tf.nn.leaky_relu], skip_connections=False)
       self._access = access.MemoryAccess(**access_config)
 
     self._access_output_size = np.prod(self._access.output_size.as_list())
@@ -118,13 +118,13 @@ class DNC(snt.RNNCore):
                                                prev_access_state)
 
     output = tf.concat([controller_output, batch_flatten(access_output)], 1)
-    output = snt.Linear(400, name='etc')(output)
+    output = snt.Linear(300, name='etc')(output)
     output = tf.nn.leaky_relu(output)
     output = snt.Linear(
         output_size=self._output_size.as_list()[0],
         name='output_linear')(output)
     output = self._clip_if_enabled(output)
-    output = tf.nn.leaky_relu(output)
+    #output = tf.nn.leaky_relu(output)
 
     return output, DNCState(
         access_output=access_output,

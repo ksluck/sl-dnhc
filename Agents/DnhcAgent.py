@@ -21,6 +21,8 @@ class DnhcAgent(Agent.Agent):
 
         self._batch_size = 32
 
+        self._counter = 0
+
         self._build()
 
 

@@ -29,6 +29,15 @@ def main():
     elif 'StackingBinary' == environment_name:
         import Tasks.Stacking_binary as Stacking
         env_fun = Stacking.Stacking
+    elif 'StackingBinaryZ' == environment_name:
+        import Tasks.Stacking_binary_z as Stacking
+        env_fun = Stacking.Stacking
+    elif 'StackingBinaryZcopy' == environment_name:
+        import Tasks.Stacking_binary_z_copy as Stacking
+        env_fun = Stacking.Stacking
+    elif 'StackingBinaryZcopyStack' == environment_name:
+        import Tasks.Stacking_binary_z_copy_stack as Stacking
+        env_fun = Stacking.Stacking
     else:
         raise ValueError('Environment name not set or unknown. Current value: {}'.format(environment_name))
 

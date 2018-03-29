@@ -172,12 +172,12 @@ class World():
 
           for episode_counter in range(start_iteration, episodes):
               #Training
-              inputs, expected_outputs = self._env.sample_set(nmbr_episodes=32, test=False)
+              inputs, expected_outputs = self._env.sample_set(nmbr_episodes=16, test=False)
               loss = self._agent.evaluate_batch(inputs=inputs, expected_outputs=expected_outputs, test=False, sess=sess)
               self._logger.logLoss(nmbr_steps=1, episode=episode_counter, loss=loss, test=False, sess=sess)
 
               #test
-              inputs, expected_outputs = self._env.sample_set(nmbr_episodes=32, test=True)
+              inputs, expected_outputs = self._env.sample_set(nmbr_episodes=16, test=True)
               loss = self._agent.evaluate_batch(inputs=inputs, expected_outputs=expected_outputs, test=True, sess=sess)
               self._logger.logLoss(nmbr_steps=1, episode=episode_counter, loss=loss, test=True, sess=sess)
 
