@@ -99,6 +99,7 @@ class DncAgent(Agent.Agent):
                 initial_state=init_state_step_vars_tuple,
                 scope="rnn_step")
         self._output_state_step = output_state_step
+        self._output_sequence_step_binary = tf.round(tf.sigmoid(self._output_sequence_step))
 
         # Flatten the output state and generate ops to assign output state to initial state
         output_state_flat = tf.contrib.framework.nest.flatten(output_state_step)
@@ -140,13 +141,10 @@ class DncAgent(Agent.Agent):
             self._input_sequence_step : [[state]],
         }
 
-        action, dnc_state, _, dnc_training_init = sess.run([self._output_sequence_step, self._output_state_step, self._assign_last_state_to_current_op, self.__initial_state], feed_dict=feed_dict)
-        self._mem_state = dnc_state.access_state.memory
-        self._instr_mem = dnc_state.access_state_2.memory
-        self._instr_mem_check = dnc_training_init.access_state_2.memory
+        action, dnc_state, _ = sess.run([self._output_sequence_step_binary, self._output_state_step, self._assign_last_state_to_current_op], feed_dict=feed_dict)
         #action = action[0][0]
         #sess.run()
-        return action
+        return action[0][0]
 
     def end_episode(self, final_state, reward, test, sess):
         pass

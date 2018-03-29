@@ -35,15 +35,6 @@ class Stacking(Task.Task):
         self._number_of_boxes = 4
         self._stacking_choices = [3.0]#[1.0,2.0,3.0]
 
-        self._step_cubes = np.array([
-            [10., 13., 5., 5.],
-            [10., 5., 10., 5.],
-            [10., 5., 5., 5.]], dtype=np.uint8
-        )
-        self._step_order = [0,1,2,3]
-        self._step_task = 3.0
-        self._step_counter = 0
-
     def _to_binary(self,ar, m):
         ar_1 = np.array(list(np.binary_repr(ar[0]).zfill(m))).astype(np.float32)
         ar_2 = np.array(list(np.binary_repr(ar[1]).zfill(m))).astype(np.float32)
@@ -64,7 +55,7 @@ class Stacking(Task.Task):
             return self.sample_from_training_set(nmbr_episodes=nmbr_episodes)
 
     def sample_from_training_set(self, nmbr_episodes):
-        inputs = np.zeros(shape=(nmbr_episodes, 7 + self._number_of_boxes, 4+3))
+        inputs = np.zeros(shape=(nmbr_episodes, 7 + self._number_of_boxes, 4*3+3))
         expected_outputs = np.zeros(shape=(nmbr_episodes, 7 + self._number_of_boxes, 4))
 
         for ep in range(0,nmbr_episodes):
@@ -74,17 +65,17 @@ class Stacking(Task.Task):
             #order_choice = [0,1,2,3]
             boxes_output_order = self._training_boxes[:,box_choices[order_choice[:]]]
 
-            inputs[ep,0:self._number_of_boxes,0:4] = np.transpose(self._training_boxes_binary[8:12,box_choices])
-            inputs[ep,self._number_of_boxes:,4] = np.ones(shape=(7,)) * stacking_choice
+            inputs[ep,0:self._number_of_boxes,0:12] = np.transpose(self._training_boxes_binary[:,box_choices])
+            inputs[ep,self._number_of_boxes:,12] = np.ones(shape=(7,)) * stacking_choice
             #inputs[ep,self._number_of_boxes:,5] = np.array(order_choice)
-            inputs[ep,self._number_of_boxes,5] = order_choice[0]
-            inputs[ep,self._number_of_boxes+1,5] = order_choice[1]
-            inputs[ep,self._number_of_boxes+2,5] = order_choice[2]
-            inputs[ep,self._number_of_boxes+3,5] = order_choice[2]
-            inputs[ep,self._number_of_boxes+4,5] = order_choice[3]
-            inputs[ep,self._number_of_boxes+5,5] = order_choice[3]
-            inputs[ep,self._number_of_boxes+6,5] = order_choice[3]
-            inputs[ep,self._number_of_boxes+1:,6] = np.ones(shape=(6,))
+            inputs[ep,self._number_of_boxes,13] = order_choice[0]
+            inputs[ep,self._number_of_boxes+1,13] = order_choice[1]
+            inputs[ep,self._number_of_boxes+2,13] = order_choice[2]
+            inputs[ep,self._number_of_boxes+3,13] = order_choice[2]
+            inputs[ep,self._number_of_boxes+4,13] = order_choice[3]
+            inputs[ep,self._number_of_boxes+5,13] = order_choice[3]
+            inputs[ep,self._number_of_boxes+6,13] = order_choice[3]
+            inputs[ep,self._number_of_boxes+1:,14] = np.ones(shape=(6,))
 
 
             expected_outputs[ep, self._number_of_boxes + 1,:] = self._to_binary_scalar(boxes_output_order[int(stacking_choice)-1, 0], 4)
@@ -102,7 +93,7 @@ class Stacking(Task.Task):
 
 
     def sample_from_test_set(self, nmbr_episodes):
-        inputs = np.zeros(shape=(nmbr_episodes, 7 + self._number_of_boxes, 4+3))
+        inputs = np.zeros(shape=(nmbr_episodes, 7 + self._number_of_boxes, 4*3+3))
         expected_outputs = np.zeros(shape=(nmbr_episodes, 7 + self._number_of_boxes, 4))
 
         for ep in range(0,nmbr_episodes):
@@ -112,17 +103,17 @@ class Stacking(Task.Task):
             #order_choice = [0,1,2,3]
             boxes_output_order = self._test_boxes[:,box_choices[order_choice[:]]]
 
-            inputs[ep,0:self._number_of_boxes,0:4] = np.transpose(self._test_boxes_binary[8:12,box_choices])
-            inputs[ep,self._number_of_boxes:,4] = np.ones(shape=(7,)) * stacking_choice
+            inputs[ep,0:self._number_of_boxes,0:12] = np.transpose(self._test_boxes_binary[:,box_choices])
+            inputs[ep,self._number_of_boxes:,12] = np.ones(shape=(7,)) * stacking_choice
             #inputs[ep,self._number_of_boxes:,5] = np.array(order_choice)
-            inputs[ep,self._number_of_boxes,5] = order_choice[0]
-            inputs[ep,self._number_of_boxes+1,5] = order_choice[1]
-            inputs[ep,self._number_of_boxes+2,5] = order_choice[2]
-            inputs[ep,self._number_of_boxes+3,5] = order_choice[2]
-            inputs[ep,self._number_of_boxes+4,5] = order_choice[3]
-            inputs[ep,self._number_of_boxes+5,5] = order_choice[3]
-            inputs[ep,self._number_of_boxes+6,5] = order_choice[3]
-            inputs[ep,self._number_of_boxes+1:,6] = np.ones(shape=(6,))
+            inputs[ep,self._number_of_boxes,13] = order_choice[0]
+            inputs[ep,self._number_of_boxes+1,13] = order_choice[1]
+            inputs[ep,self._number_of_boxes+2,13] = order_choice[2]
+            inputs[ep,self._number_of_boxes+3,13] = order_choice[2]
+            inputs[ep,self._number_of_boxes+4,13] = order_choice[3]
+            inputs[ep,self._number_of_boxes+5,13] = order_choice[3]
+            inputs[ep,self._number_of_boxes+6,13] = order_choice[3]
+            inputs[ep,self._number_of_boxes+1:,14] = np.ones(shape=(6,))
 
 
             expected_outputs[ep, self._number_of_boxes + 1,:] = self._to_binary_scalar(boxes_output_order[int(stacking_choice)-1, 0], 4)
@@ -152,27 +143,7 @@ class Stacking(Task.Task):
                         action
         """
         reward = None
-        next_state = np.zeros(shape=(4+3))
-        i = self._step_counter
-        if self._step_counter < 4:
-            next_state[0:4] =  self._to_binary_scalar(self._step_cubes[2,self._step_order[i]], 4)
-        elif self._step_counter == 4:
-            next_state[4] = self._step_task
-            next_state[5] = self._step_order[0]
-        elif self._step_counter == 5:
-            next_state[4] = self._step_task
-            next_state[5] = self._step_order[1]
-            next_state[6] = 1.
-        elif self._step_counter == 6 or self._step_counter == 7:
-            next_state[4] = self._step_task
-            next_state[5] = self._step_order[2]
-            next_state[6] = 1.
-        elif self._step_counter >= 8:
-            next_state[4] = self._step_task
-            next_state[5] = self._step_order[3]
-            next_state[6] = 1.
-
-        self._step_counter += 1
+        next_state = None
         return reward, next_state
 
     def is_finished(self, sess):
@@ -184,7 +155,7 @@ class Stacking(Task.Task):
         Returns:
             Boolean if session has ended, false if not.
         """
-        return self._step_counter == 11
+        return True
 
     def reset(self, test, sess):
         """ Reset operation for restarting the environment and starting a new
@@ -198,7 +169,6 @@ class Stacking(Task.Task):
         Returns:
             start_state: The initial state of the new episode
         """
-        self._step_counter = 0
         startState = None
         return startState
 
@@ -208,7 +178,7 @@ class Stacking(Task.Task):
         Returns:
             Tuple which contains the dimensions of the state.
         """
-        return (7,)
+        return (4*3+3,)
 
     def get_action_size(self):
         """Returns the size of the actions.

@@ -91,34 +91,46 @@ class World():
 
           for _ in range(0,1):
 
-              inputs, expected_outputs = self._env.sample_set(nmbr_episodes=32, test=True)
-              loss = self._agent.evaluate_batch(inputs=inputs, expected_outputs=expected_outputs, test=True, sess=sess)
               self._agent.start_episode(None,None,sess=sess)
-              for step in range(0,4):
-                  state = np.zeros(6)
-                  state[0:3] = order[step]
-                  #st = sess.run(self._agent._init_state_step_vars_tuple.access_state.memory)
-                  #print(st)
-                  #print('-------------------')
-                  action = self._agent.step(state, None, None, None, None, sess=sess)
-                  print("State: {}".format(state))
-                  print("Action: {}".format(action))
-                  #print(self._agent._mem_state)
-              for step in range(0, 4):
-                  state = np.zeros(6)
-                  state[3] = 1
-                  state[4] = task
-                  state[5] = readout_order[step]
+              self._env.reset(True, sess=sess)
 
-                  #st = sess.run(self._agent._init_state_step_vars_tuple.access_state.memory)
-                  #print(st)
-                  #print('-------------------')
+              while not self._env.is_finished(sess):
+                  _, state = self._env.step(None, True, sess)
                   action = self._agent.step(state, None, None, None, None, sess=sess)
                   print("State: {}".format(state))
                   print("Action: {}".format(action))
-                  #print(self._agent._mem_state)
-                  #print(self._agent._instr_mem[0,0])
-                  #print(self._agent._instr_mem_check[0,0])
+
+              # #inputs, expected_outputs = self._env.sample_set(nmbr_episodes=16, test=True)
+              # #loss = self._agent.evaluate_batch(inputs=inputs, expected_outputs=expected_outputs, test=True, sess=sess)
+              # self._agent.start_episode(None,None,sess=sess)
+              # self._env.reset(True, sess=sess)
+              # for step in range(0,4):
+              #     #state = np.zeros(6)
+              #     #state[0:3] = order[step]
+              #     #st = sess.run(self._agent._init_state_step_vars_tuple.access_state.memory)
+              #     #print(st)
+              #     #print('-------------------')
+              #     _, state = self._env.step(None, True, sess)
+              #     action = self._agent.step(state, None, None, None, None, sess=sess)
+              #     print("State: {}".format(state))
+              #     print("Action: {}".format(action))
+              #     #print(self._agent._mem_state)
+              # for step in range(0, 4):
+              #     #state = np.zeros(6)
+              #     #state[3] = 1
+              #     #state[4] = task
+              #     #state[5] = readout_order[step]
+              #
+              #     #st = sess.run(self._agent._init_state_step_vars_tuple.access_state.memory)
+              #     #print(st)
+              #     #print('-------------------')
+              #     _, state = self._env.step(None, True, sess)
+              #     action = self._agent.step(state, None, None, None, None, sess=sess)
+              #     print("State: {}".format(state))
+              #     print("Action: {}".format(action))
+              #     #print(self._agent._mem_state)
+              #     #print(self._agent._instr_mem[0,0])
+              #     #print(self._agent._instr_mem_check[0,0])
 
 
     def execute(self, episodes=100000):

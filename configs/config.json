@@ -1,6 +1,6 @@
 {
   "rendering" : true,
-  "execution" : false,
+  "execution" : true,
   "agent" : "DncAgent",
   "environment" : "StackingBinaryZcopyStack",
   "episodes" : 100000,
@@ -99,5 +99,6 @@
   "StackingBinary": {},
   "StackingBinaryZ": {},
   "StackingBinaryZcopy": {},
-  "StackingBinaryZcopyStack": {}
+  "StackingBinaryZcopyStack": {},
+  "StackingBinaryZcopyStackNoise": {}
 }
