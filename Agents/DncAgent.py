@@ -34,7 +34,7 @@ class DncAgent(Agent.Agent):
         learning_rate = self._config['learning_rate']
 
         #TODO
-        self._episode_length = 4+7
+        self._episode_length = 4+4
 
         dnc_core = dnc.DNC(dnc_access_config, dnc_controller_config, dnc_output_size, dnc_clip_value)
 
@@ -65,7 +65,7 @@ class DncAgent(Agent.Agent):
         #self._loss = tf.reduce_mean(tf.square(self._loss))/2.0
         #self._loss = self._loss / (self._batch_size * 3)
         xent = tf.nn.sigmoid_cross_entropy_with_logits(labels=batch_output_masked, logits=output_masked)
-        self._loss  = tf.reduce_sum(xent) / (self._batch_size * 6.0)
+        self._loss  = tf.reduce_sum(xent) / (self._batch_size * 3.0)
 
         trainable_variables = dnc_core.get_variables()
         grads, _ = tf.clip_by_global_norm(

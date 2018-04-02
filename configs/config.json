@@ -2,9 +2,9 @@
   "rendering" : true,
   "execution" : false,
   "agent" : "DncAgent",
-  "environment" : "StackingBinaryXYZcopyStack",
-  "episodes" : 400000,
-  "exp_id" : 6004,
+  "environment" : "StackingBinaryXYZSum",
+  "episodes" : 5000000,
+  "exp_id" : 6005,
   "filepath" : "/tmp/tf_dnc",
   "logger" : "tensorboard",
   "checkpoint_interval" : 100,
@@ -101,5 +101,6 @@
   "StackingBinaryZcopy": {},
   "StackingBinaryZcopyStack": {},
   "StackingBinaryXYZcopyStack": {},
-  "StackingBinaryZcopyStackNoise": {}
+  "StackingBinaryZcopyStackNoise": {},
+  "StackingBinaryXYZSum": {}
 }

@@ -44,6 +44,9 @@ def main():
     elif 'StackingBinaryZcopyStackNoise' == environment_name:
         import Tasks.Stacking_binary_z_copy_stack_noise as Stacking
         env_fun = Stacking.Stacking
+    elif 'StackingBinaryXYZSum' == environment_name:
+        import Tasks.Stacking_binary_xyz_sum as Stacking
+        env_fun = Stacking.Stacking
     else:
         raise ValueError('Environment name not set or unknown. Current value: {}'.format(environment_name))
 
